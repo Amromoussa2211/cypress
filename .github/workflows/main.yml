@@ -31,10 +31,13 @@ jobs:
       run: npx allure generate allure-results --clean -o allure-report
 
     - name: Archive Allure report
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: allure-report
         path: allure-report
+
+    - name: Zip Allure report
+      run: zip -r allure-report.zip allure-report
 
     - name: Send email with Allure report
       env:
@@ -43,13 +46,9 @@ jobs:
         EMAIL_SMTP_PORT: ${{ secrets.EMAIL_SMTP_PORT }}
         EMAIL_SMTP_USER: ${{ secrets.EMAIL_SMTP_USER }}
         EMAIL_SMTP_PASS: ${{ secrets.EMAIL_SMTP_PASS }}
-      run: |
-        echo "Sending email with Allure report..."
-        # Add your email sending script here
+      run: node send-email.js
 
     - name: Send Slack notification
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      run: |
-        echo "Sending Slack notification..."
-        # Add your Slack notification script here
+      run: node notify-slack.js "Build Status" "All tests passed successfully."
